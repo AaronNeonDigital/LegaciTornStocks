@@ -1,48 +1,61 @@
-console.log('hi')
-fetch('https://www.torn.com/page.php?sid=StockMarket&step=getInitialData')
-    .then(response => response.json())
-    .then(data => {
+this.loadData();
 
-        const container = document.getElementById("ts_table_row");
+setInterval(() => {
+    const currentDate = new Date();
+    if (currentDate.getSeconds() === 10) {
+        this.loadData();
+    }
+}, 1000);
 
 
-        const innerStuff = '';
 
-        data.stocks.forEach(stock => {
-            if (stock.userOwned.sharesAmount > 0) {
-                stock.userOwned.transactions.forEach(transaction => {
-                    const row = document.createElement("tr");
+function loadData() {
+    fetch('https://www.torn.com/page.php?sid=StockMarket&step=getInitialData')
+        .then(response => response.json())
+        .then(data => {
 
-                    let currentPrice = stock.sharesPrice.chartData[1].value;
-                    let boughtPrice = transaction.boughtPrice;
-                    let shares = transaction.amount;
+            const container = document.getElementById("ts_table_row");
+            container.innerHTML = "";
 
-                    const Percentage = this.calculatePercentage((currentPrice - boughtPrice), currentPrice).toFixed(2) + '%';
+            const innerStuff = '';
 
-                    if (calculatePercentage((currentPrice - boughtPrice), currentPrice).toFixed(2) > 0) {
-                        row.classList.add('text-green-600');
-                    } else {
-                        row.classList.add('text-red-600');
-                    }
+            data.stocks.forEach(stock => {
+                if (stock.userOwned.sharesAmount > 0) {
+                    stock.userOwned.transactions.forEach(transaction => {
+                        const row = document.createElement("tr");
 
-                    row.innerHTML = '<td class="whitespace-nowrap px-3 py-1 text-sm font-semibold">' + stock.profile.acronym + '</td>'
-                        +'<td class="whitespace-nowrap px-3 py-1 text-sm">' + Percentage + '</td>'
-                        +'<td class="whitespace-nowrap px-3 py-1 text-sm">$' + (currentPrice - boughtPrice).toFixed(2)+'</td>'
-                        +'<td class="whitespace-nowrap px-3 py-1 text-sm">$' + boughtPrice+'</td>'
-                        +'<td class="whitespace-nowrap px-3 py-1 text-sm">$' + currentPrice+'</td>'
-                        +'<td class="whitespace-nowrap px-3 py-1 text-sm">$' + numberWithCommas((boughtPrice * shares).toFixed(0)) +'</td>';
+                        let currentPrice = stock.sharesPrice.chartData[1].value;
+                        let boughtPrice = transaction.boughtPrice;
+                        let shares = transaction.amount;
 
-                    container.appendChild(row);
-                })
-            }
-        })
+                        const Percentage = this.calculatePercentage((currentPrice - boughtPrice), currentPrice).toFixed(2) + '%';
 
-        // document.body.appendChild(container);
-    });
+                        if (calculatePercentage((currentPrice - boughtPrice), currentPrice).toFixed(2) > 0) {
+                            row.classList.add('text-green-600');
+                        } else {
+                            row.classList.add('text-red-600');
+                        }
+
+                        row.innerHTML = '<td class="whitespace-nowrap px-3 py-1 text-sm font-semibold">' + stock.profile.acronym + '</td>'
+                            + '<td class="whitespace-nowrap px-3 py-1 text-sm">' + Percentage + '</td>'
+                            + '<td class="whitespace-nowrap px-3 py-1 text-sm">$' + (currentPrice - boughtPrice).toFixed(2) + '</td>'
+                            + '<td class="whitespace-nowrap px-3 py-1 text-sm">$' + boughtPrice + '</td>'
+                            + '<td class="whitespace-nowrap px-3 py-1 text-sm">$' + currentPrice + '</td>'
+                            + '<td class="whitespace-nowrap px-3 py-1 text-sm">$' + numberWithCommas((boughtPrice * shares).toFixed(0)) + '</td>';
+
+                        container.appendChild(row);
+                    })
+                }
+            })
+
+            // document.body.appendChild(container);
+        });
+}
 
 function calculatePercentage(percent, total) {
     return (percent / total) * 100;
 }
+
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
